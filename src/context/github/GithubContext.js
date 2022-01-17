@@ -10,6 +10,8 @@ export const GithubProvider = ({ children }) => {
   // reducer in place of state
   const initialState = {
     users: [],
+    user: {},
+    repos: [],
     loading: false,
   };
 
@@ -52,13 +54,56 @@ export const GithubProvider = ({ children }) => {
     });
   };
 
+  // get single user
+  const getUser = async (login) => {
+    setLoading();
+
+    const res = await fetch(`${GITHUB_URL}/users/${login}`, {
+      headers: {
+        Authorization: `${GITHUB_TOKEN}`,
+      },
+    });
+
+    // check if it is 404 to redirect to error page
+    if (res.status === 404) {
+      window.location = "/notfound";
+    } else {
+      const data = await res.json();
+
+      dispatch({
+        type: "GET_USER",
+        payload: data,
+      });
+    }
+  };
+
+  // get repos
+  const getRepos = async (login) => {
+    const res = await fetch(`${GITHUB_URL}/users/${login}/repos?`, {
+      headers: {
+        Authorization: `${GITHUB_TOKEN}`,
+      },
+    });
+
+    const data = await res.json();
+
+    dispatch({
+      type: "GET_REPOS",
+      payload: data,
+    });
+  };
+
   return (
     <GithubContext.Provider
       value={{
         users: state.users,
         loading: state.loading,
+        user: state.user,
+        repos: state.repos,
         searchUsers,
         handleClear,
+        getUser,
+        getRepos,
       }}
     >
       {children}

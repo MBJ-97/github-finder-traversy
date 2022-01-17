@@ -1,8 +1,10 @@
 import { useState, useContext } from "react";
 import GithubContext from "../../context/github/GithubContext";
+import AlertContext from "../../context/alert/AlertContext";
 
 function UserSearch() {
   const { users, searchUsers, handleClear } = useContext(GithubContext); // hide clear when no users
+  const { setAlert } = useContext(AlertContext);
   const [text, setText] = useState("");
 
   const handleChange = (e) => {
@@ -13,7 +15,7 @@ function UserSearch() {
     e.preventDefault();
 
     if (text === "") {
-      alert("Can't be empty");
+      setAlert("Can't be empty");
     } else {
       searchUsers(text);
       setText("");
