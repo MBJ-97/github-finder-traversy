@@ -1,9 +1,10 @@
 import { useState, useContext } from "react";
 import GithubContext from "../../context/github/GithubContext";
 import AlertContext from "../../context/alert/AlertContext";
+import { searchUsers } from "../../context/github/GithubActions";
 
 function UserSearch() {
-  const { users, searchUsers, handleClear } = useContext(GithubContext); // hide clear when no users
+  const { users, dispatch } = useContext(GithubContext); // hide clear when no users
   const { setAlert } = useContext(AlertContext);
   const [text, setText] = useState("");
 
@@ -11,13 +12,27 @@ function UserSearch() {
     setText(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const clearSearch = () => {
+    dispatch({
+      type: "CLEAR_SEARCH",
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (text === "") {
       setAlert("Can't be empty");
     } else {
-      searchUsers(text);
+      const users = await searchUsers(text);
+      // loading before data comes
+      dispatch({
+        type: "SET_LOADING",
+      });
+      dispatch({
+        type: "GET_USERS",
+        payload: users,
+      });
       setText("");
     }
   };
@@ -47,7 +62,7 @@ function UserSearch() {
       </div>
       {users.length > 0 && (
         <div>
-          <button onClick={handleClear} className="btn btn-ghost btn-lg">
+          <button onClick={clearSearch} className="btn btn-ghost btn-lg">
             Clear
           </button>
         </div>

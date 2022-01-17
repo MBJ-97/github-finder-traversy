@@ -1,18 +1,30 @@
 import { useContext, useEffect } from "react";
 import GithubContext from "../context/github/GithubContext";
+import { getUserAndRepos } from "../context/github/GithubActions";
 import { useParams, Link } from "react-router-dom";
 import { FaUsers, FaUserFriends, FaCodepen, FaStore } from "react-icons/fa";
 import RepoList from "../components/repos/RepoList";
 
 function User() {
   const params = useParams();
-  const { user, getUser, loading, getRepos, repos } = useContext(GithubContext);
+  const { user, loading, repos, dispatch } = useContext(GithubContext);
 
   useEffect(() => {
-    getUser(params.login);
-    getRepos(params.login);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // before getting data we want set loading state
+    dispatch({
+      type: "SET_LOADING",
+    });
+    const getUserData = async () => {
+      const userData = await getUserAndRepos(params.login); // call the action
+      // then dispatch it to state
+      dispatch({
+        type: "GET_USER_AND_REPOS",
+        payload: userData,
+      });
+    };
+
+    getUserData();
+  }, [dispatch, params.login]);
   if (loading) {
     <h3>loading</h3>;
   }
